@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<!-- gauss_jacobi/templates/gauss_jacobi/result.html -->
+
+<table>
+    <thead>
+        <tr>
+            <th>Iteration</th>
+            <th>Coefficient/Variable 1</th>
+            <th>Coefficient/Variable 2</th>
+            <!-- Add more columns as needed based on the number of equations -->
+        </tr>
+    </thead>
+    <tbody>
+        {% for iteration, values in results.items %}
+        <tr>
+            <td>{{ iteration }}</td>
+            {% for value in values %}
+            <td>{{ value }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+</body>
+</html>
