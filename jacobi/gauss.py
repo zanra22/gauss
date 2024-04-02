@@ -12,25 +12,22 @@ def parse_equation(equation, num_variables):
     terms = parts[0].split("+")
     for term in terms:
         term = term.strip()  # Remove leading/trailing whitespaces
-        if term:
-            if 'x' in term:
-                coef, rest = term.split('x')
-                coef = float(coef) if coef else 1.0
-                coefficients[0] = coef
-            elif 'y' in term:
-                coef, rest = term.split('y')
-                coef = float(coef) if coef else 1.0
-                coefficients[1] = coef
-            elif 'z' in term:
-                coef, rest = term.split('z')
-                coef = float(coef) if coef else 1.0
-                coefficients[2] = coef
-            else:
-                constant = float(term)
+        variable_index = term.find('x') if 'x' in term else (term.find('y') if 'y' in term else term.find('z'))
+        if variable_index != -1:
+            coef = term[:variable_index]
+            if coef:
+                coefficients[ord(term[variable_index]) - ord('x')] = float(coef)
+        else:
+            constant = float(term)
+
     return coefficients, constant
 
 
-def gauss_jacobi_algorithm(equations, initial_guesses, tolerance=1e-6, max_iterations=100):
+
+
+
+
+def gauss_jacobi_algorithm(equations, initial_guesses, max_iterations=100):
     # Parse equations and initial guesses
     parsed_equations = []
     variables = set()
@@ -40,7 +37,6 @@ def gauss_jacobi_algorithm(equations, initial_guesses, tolerance=1e-6, max_itera
             variable = term.strip()[-1]
             variables.add(variable)
     num_variables = len(variables)
-    # Parse equations and initial guesses
     # Parse equations and initial guesses
     parsed_equations = [parse_equation(eq, num_variables) for eq in equations.strip().split('\n')]
 
@@ -60,22 +56,26 @@ def gauss_jacobi_algorithm(equations, initial_guesses, tolerance=1e-6, max_itera
             for k in range(num_variables):
                 if k != j:
                     sum_ += parsed_equations[j][0][k] * x[k]
-            print("Equation:", j + 1)
-            print("Sum:", sum_)
-            print("Coefficient[j][j]:", parsed_equations[j][0][j])
             if parsed_equations[j][0][j] == 0:
                 new_x[j] = np.nan  # Handle division by zero
             else:
                 new_x[j] = (parsed_equations[j][1] - sum_) / parsed_equations[j][0][j]
-            print("New value:", new_x[j])
 
-        # Check convergence
-        if np.allclose(new_x, x, atol=tolerance, equal_nan=True):
-            break
+        print("Iteration:", i)
+        print("Equations:", parsed_equations)
+        print("Current X:", x)
+        print("New X:", new_x)
 
         x = new_x
         results[i] = x.tolist()
 
     return results
+
+
+
+
+
+
+
 
 
