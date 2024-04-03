@@ -1,5 +1,3 @@
-# gauss_jacobi/gauss_jacobi.py
-
 import numpy as np
 
 def parse_equation(equation, num_variables):
@@ -9,16 +7,23 @@ def parse_equation(equation, num_variables):
 
     # Extract coefficients
     coefficients = [0.0] * num_variables
-    terms = parts[0].split("+")
+    terms = parts[0].replace('-', '+-').split('+')  # Split by '+' and replace '-' with '+-'
     for term in terms:
         term = term.strip()  # Remove leading/trailing whitespaces
         variable_index = term.find('x') if 'x' in term else (term.find('y') if 'y' in term else term.find('z'))
         if variable_index != -1:
             coef = term[:variable_index]
             if coef:
-                coefficients[ord(term[variable_index]) - ord('x')] = float(coef)
+                variable_char = term[variable_index]
+                variable_index = ord(variable_char) - ord('x')
+                if coef == '-' or coef == '':
+                    coefficients[variable_index] = -1.0  # Handle negative coefficient or implicit 1
+                else:
+                    coefficients[variable_index] = float(coef)
+            else:
+                coefficients[variable_index] = 1.0  # Handle implicit coefficient 1
         else:
-            constant = float(term)
+            constant = float(term)  # Handle terms without variables
 
     return coefficients, constant
 
@@ -44,38 +49,38 @@ def gauss_jacobi_algorithm(equations, initial_guesses, max_iterations=100):
     if isinstance(initial_guesses, str):
         initial_guesses = [float(x) for x in initial_guesses.split()]
 
-    # Extract number of variables
-    results = {}
+    # Initialize x with the initial guess
     x = np.array(initial_guesses)
+
+    results = {}
     results[0] = x.tolist()
 
     for i in range(1, max_iterations + 1):
         new_x = np.zeros(num_variables)
+
+        print("results", results[i-1])
         for j in range(num_variables):
-            sum_ = 0
+
+            sum_ = parsed_equations[j][1]  # Include the constant term
+            # print(sum_)
             for k in range(num_variables):
+                # print(sum_)
+
                 if k != j:
-                    sum_ += parsed_equations[j][0][k] * x[k]
+
+                    print(parsed_equations[j][0])
+                    sum_ -= parsed_equations[j][0][k] * x[k]# Use the updated x values from the previous iteration
             if parsed_equations[j][0][j] == 0:
                 new_x[j] = np.nan  # Handle division by zero
+                x = new_x.copy()
             else:
-                new_x[j] = (parsed_equations[j][1] - sum_) / parsed_equations[j][0][j]
+                new_x[j] = sum_ / parsed_equations[j][0][j]
 
-        print("Iteration:", i)
-        print("Equations:", parsed_equations)
-        print("Current X:", x)
-        print("New X:", new_x)
-
-        x = new_x
+        print("new_x", new_x.copy())
+        # Update x with the new values
+        x = new_x.copy()
         results[i] = x.tolist()
 
     return results
-
-
-
-
-
-
-
 
 
